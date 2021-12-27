@@ -23,7 +23,7 @@ class TwitchOAuth2 {
         };
 
     constructor(server, stateToken=Rand.randomString(32), vars={}) {
-        this._varNames = Object.assign(TwitchOAuth2.defaultVars, vars);
+        this._varNames = Object.assign({}, TwitchOAuth2.defaultVars, vars);
         this._stateToken = stateToken;
         this._authCodeUrl = null;
             

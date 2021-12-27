@@ -1,6 +1,16 @@
-const net = require('net');
+import * as net from 'net';
 
-class IrcClient {
+export class IrcClient {
+    private _onMsg:Array<Function>;
+    private _onDisconnect:Array<Function>;
+    private verbose:boolean;
+    
+    readonly connected:boolean;
+    private channels:Array<string>;
+    private identity:string;
+
+    private client?:net.Socket;
+
     constructor(verbose=false) {
         this._onMsg = [];
         this._onDisconnect = [];
@@ -11,7 +21,7 @@ class IrcClient {
         this.identity = '';
     }
 
-    on(eventName, handler) {
+    on(eventName:string, handler:Function) {
         switch (eventName) {
             case 'msg': this._onMsg.push(handler); break;
             case 'disconnect': this._onDisconnect.push(handler); break;
@@ -19,11 +29,11 @@ class IrcClient {
         }
     }
 
-    parse(tags, prefix, cmd, args) {
+    parse(tags:string, prefix:string, cmd:string, args:Array<string>) {
         switch(cmd) {
             case 'PRIVMSG': return {
                     tags, prefix, cmd,
-                    channel: args.shift().slice(1),
+                    channel: args.shift()?.slice(1),
                     user: prefix.slice(1, prefix.indexOf('!')),
                     msg: args.join(' ').slice(1)
                 };
@@ -47,13 +57,13 @@ class IrcClient {
         }
     }
 
-    connect(host, port, timeout=-1) {
+    connect(host:string, port:number, timeout=-1) {
         if (!!this.client) {
             throw 'IrcClient - already have a connection';
         }
 
         return new Promise((resolve, reject) => {
-            let connectTimeout;
+            let connectTimeout:NodeJS.Timeout;
             if (timeout > 0) {
                 connectTimeout = setTimeout(() => {
                     reject('IrcClient.connect - connection timeout')
@@ -64,8 +74,9 @@ class IrcClient {
                 console.log(`[INFO] IrcClient.connect:  connected to server @ ${host}:${port}`);
                 if (timeout > 0)
                     clearTimeout(connectTimeout);
+                //@ts-ignore
                 this.connected = true;
-                resolve();
+                resolve(null);
             });
             
             this.client.on('data', (data) => {
@@ -75,14 +86,14 @@ class IrcClient {
                     const parts = msg.split(' ');
 
                     const hasTags = parts[0].startsWith('@');
-                    const tags = hasTags ? parts.shift() : null;
+                    const tags = hasTags ? parts.shift() : '';
 
                     const hasPrefix = parts[0].startsWith(':');
                     const prefix = hasPrefix ? parts.shift() : null;
 
                     const command = parts.shift();
                     
-                    const body = this.parse(tags, prefix, command, parts);
+                    const body = this.parse(tags??'', prefix??'', command??'', parts);
                     if (body.cmd === 'PRIVMSG') {
                         this._onMsg.forEach(func => func(body.channel, body.user, body.msg));
                     } else if (body.cmd === 'NOTICE') {
@@ -91,9 +102,10 @@ class IrcClient {
                         console.log(`< ~${body.sender}#${body.user}: ${body.msg}`);
                     } else {
                         if (body.cmd === 'PING')
-                            this.pong(body.server)
+                            if (!!body.server)
+                                this.pong(body.server)
                         else if (this.verbose)
-                            console.log(`< ${body.cmd} ${body.args.join(' ')}`);
+                            console.log(`< ${body.cmd} ${body.args?.join(' ')}`);
                     }
                 });
             });
@@ -109,13 +121,14 @@ class IrcClient {
         while (this.channels.length > 0) {
             this.part(this.channels[0]);
         }
-        this.client.end();
-        this.client.destroy();
+        this.client?.end();
+        this.client?.destroy();
+        //@ts-ignore
         this.connected = false;
         this._onDisconnect.forEach(handler => handler());
     }
 
-    msg(command, parameters, log) {
+    msg(command:string, parameters:Array<string>, log:boolean) {
         if (!this.connected)
             throw 'IrcClient - not connected';
 
@@ -123,45 +136,45 @@ class IrcClient {
         if (content.length > 510) {
             throw `IrcClient - message exceeds character limit (${content.length}/510)`;
         }
-        this.client.write(`${content}\r\n`);
+        this.client?.write(`${content}\r\n`);
         if (log) {
             console.log(`> ${content}`);
         }
     }
 
-    pass(token) {
+    pass(token:string) {
         this.msg('PASS', [token], this.verbose);
     }
 
-    nick(identity) {
+    nick(identity:string) {
         identity = identity.toLowerCase()
         this.msg('NICK', [identity], this.verbose);
         this.identity = identity;
     }
 
-    join(channel) {
+    join(channel:string) {
         channel = channel.toLowerCase();
         this.msg('JOIN', [`#${channel}`], this.verbose);
         this.channels.push(channel);
         console.log(`[INFO] IrcClient.join: ${channel}`);
     }
 
-    part(channel) {
+    part(channel:string) {
         channel = channel.toLowerCase();
         this.msg('PART', [`#${channel}`], this.verbose);
         this.channels = this.channels.filter(value => value !== channel);
         console.log(`[INFO] IrcClient.part: ${channel}`);
     }
 
-    cap(name) {
+    cap(name:string) {
         this.msg('CAP', ['REQ', name], this.verbose);
     }
 
-    pong(server) {
+    pong(server:string) {
         this.msg('PONG', [`:${server}`], this.verbose);
     }
 
-    privmsg(channel, text) {
+    privmsg(channel:string, text:string) {
         channel = channel.toLowerCase();
         if (this.channels.indexOf(channel) >= 0) {
             this.msg('PRIVMSG', [`#${channel}`, `:${text}`], this.verbose);
@@ -172,10 +185,8 @@ class IrcClient {
         }
     }
 
-    whisper(target, text) {
+    whisper(target:string, text:string) {
         target = target.toLowerCase()
         this.msg('PRIVMSG', ['jtv', `:.w ${target} ${text}`], this.verbose);
     }
 }
-
-module.exports = IrcClient;

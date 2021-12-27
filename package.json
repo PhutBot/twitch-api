@@ -18,5 +18,8 @@
   "homepage": "https://github.com/PhutBot/twitch-api#readme",
   "devDependencies": {
     "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "helper-js": "git+ssh://git@github.com/PhutBot/HelperJs.git#feature/typescript"
   }
 }
