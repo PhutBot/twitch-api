@@ -11,9 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const { Env, Https, Millis, Rand } = require('helper-js');
 // PhutBot PLEASE remember to be careful when debugging this class on stream
 class TwitchOAuth2 {
-    constructor(server, stateToken, vars = {}) {
+    constructor(server, stateToken = Rand.randomString(32), vars = {}) {
         this._varNames = Object.assign(TwitchOAuth2.defaultVars, vars);
-        this._stateToken = stateToken || Rand.randomString(32); // need to randomize
+        this._stateToken = stateToken;
         this._authCodeUrl = null;
         if (!!server) {
             this._serverRunning = false;

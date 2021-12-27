@@ -22,9 +22,9 @@ class TwitchOAuth2 {
             EXPIRES: 'TWITCH_OAUTH2.EXPIRATION'
         };
 
-    constructor(server, stateToken, vars={}) {
+    constructor(server, stateToken=Rand.randomString(32), vars={}) {
         this._varNames = Object.assign(TwitchOAuth2.defaultVars, vars);
-        this._stateToken = stateToken || Rand.randomString(32); // need to randomize
+        this._stateToken = stateToken;
         this._authCodeUrl = null;
             
         if (!!server) {
