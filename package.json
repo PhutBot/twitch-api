@@ -1,0 +1,19 @@
+{
+  "name": "twitch-api",
+  "version": "1.0.0",
+  "description": "Interface for twitch api and chat",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PhutBot/twitch-api.git"
+  },
+  "author": "PhutBot",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PhutBot/twitch-api/issues"
+  },
+  "homepage": "https://github.com/PhutBot/twitch-api#readme"
+}
