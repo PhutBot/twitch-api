@@ -1,0 +1,14 @@
+# ignore emacs backup files
+*~
+
+# ignore hidden files
+.*
+!.gitignore
+!.dockerignore
+
+# vscode
+.vscode/
+*.code-workspace
+
+# node
+node_modules/
