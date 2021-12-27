@@ -2,7 +2,7 @@
   "name": "twitch-api",
   "version": "1.0.0",
   "description": "Interface for twitch api and chat",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "node test.js"
   },
@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/PhutBot/twitch-api/issues"
   },
-  "homepage": "https://github.com/PhutBot/twitch-api#readme"
+  "homepage": "https://github.com/PhutBot/twitch-api#readme",
+  "devDependencies": {
+    "typescript": "^4.5.4"
+  }
 }
