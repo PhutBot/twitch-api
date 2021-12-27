@@ -13,7 +13,7 @@ declare class TwitchOAuth2 {
         body: any;
     }): void;
     static _scopeVars(name: any, members: any): {};
-    constructor(server?: null, stateToken?: null, vars?: {});
+    constructor(server: any, stateToken: any, vars?: {});
     _varNames: {
         ID: string;
         SECRET: string;
