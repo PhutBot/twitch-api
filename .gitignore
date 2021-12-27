@@ -11,5 +11,4 @@
 *.code-workspace
 
 # node
-dist/
 node_modules/
